@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Back
+    uniqueID: 611524507
+    locked: 0
+  - name: Card 4
+    uniqueID: 694851039
+    locked: 0
+  - name: Card 3
+    uniqueID: 1140481297
+    locked: 0
+  - name: Card 2
+    uniqueID: 2418599863
+    locked: 0
+  - name: Card 1
+    uniqueID: 3860962789
+    locked: 0
+  - name: Card Drawn
+    uniqueID: 1674766899
+    locked: 0
