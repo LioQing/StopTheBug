@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using Mirror;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FaceUpCard : MonoBehaviour
+public class FaceUpCard : NetworkBehaviour
 {
 	public int value = -1;
+	public IList<int> stack = new List<int>();
 
 	private SpriteRenderer spriteRenderer;
 	private CardSprites cardSprites;

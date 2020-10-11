@@ -7,6 +7,8 @@ public class FaceDownStack : MonoBehaviour
 {
 	public int quarter;
 	public Sprite[] sprites = new Sprite[4];
+	public IList<int> stack = new List<int>();
+	public int top;
 
 	private SpriteRenderer spriteRenderer;
 	private BoxCollider2D collider;
