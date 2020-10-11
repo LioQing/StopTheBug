@@ -6,14 +6,17 @@ using UnityEngine;
 public class FaceUpCard : NetworkBehaviour
 {
 	public int value = -1;
-	public IList<int> stack = new List<int>();
+	public int lastValue = -1;
 
+	private PlayerManager playerManager;
 	private SpriteRenderer spriteRenderer;
 	private CardSprites cardSprites;
 
 	public void SetValue(int val)
 	{
+		lastValue = value;
 		value = val;
+		
 		if (value < 0 || value > 12)
 			spriteRenderer.sprite = null;
 		else
@@ -30,5 +33,12 @@ public class FaceUpCard : NetworkBehaviour
 	private void Update()
 	{
 		transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
+	}
+
+	private void OnMouseDown()
+	{
+		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+		playerManager = networkidentity.GetComponent<PlayerManager>();
+		playerManager.CmdPickCard(playerManager.playerId);
 	}
 }

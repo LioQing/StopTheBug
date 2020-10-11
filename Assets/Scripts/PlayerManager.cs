@@ -21,8 +21,10 @@ public class PlayerManager : NetworkBehaviour
 	public GameData gameData = null;
 	public int playerId;
 
-	private bool clientSynced = false;
-	private bool serverStarted = false;
+	[SerializeField] private bool clientSynced = false;
+	[SerializeField] private bool serverStarted = false;
+
+
 
 	public override void OnStartClient()
 	{
@@ -46,27 +48,12 @@ public class PlayerManager : NetworkBehaviour
 		gameData = GameObject.Find("Game Data").GetComponent<GameData>();
 	}
 
-	public override void OnStopClient()
-	{
-		base.OnStopClient();
-
-		foreach (var card in handCards)
-		{
-			Destroy(card.gameObject);
-		}
-
-		Destroy(faceUpCard.gameObject);
-	}
-
-	[Server]
 	public override void OnStopServer()
 	{
-		base.OnStopServer();
-
-		Destroy(gameData.gameObject);
+		gameData.SetPlayerTurn(0);
+		gameData.SetPlayerCount(0);
+		gameData.SetPlayerDrawn(false);
 	}
-
-
 
 	private void Update()
 	{
@@ -80,10 +67,15 @@ public class PlayerManager : NetworkBehaviour
 			}
 			faceDownStack.top = faceDownStack.stack.Count - 1;
 
-			faceUpCard.stack.Clear();
+			faceUpCard.SetValue(-1);
+			faceUpCard.SetValue(-1);
 
-			gameData.SetPlayerDrawn(false);
-			gameData.SetPlayerTurn(0);
+
+			
+
+			handCards[0].SetValue(-1);
+			RpcInitDrawnCard();
+			
 
 			serverStarted = true;
 		}
@@ -101,6 +93,12 @@ public class PlayerManager : NetworkBehaviour
 		}
 	}
 
+
+	[ClientRpc]
+	private void RpcInitDrawnCard()
+	{
+		handCards[0].SetValue(-1);
+	}
 
 
 
@@ -123,15 +121,15 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	public void CmdClientSync()
 	{
-		RpcClientSync(handCards[0].value, (List<int>)faceUpCard.stack, (List<int>)faceDownStack.stack, faceDownStack.top, faceUpCard.value);
+		RpcClientSync(handCards[0].value, (List<int>)faceDownStack.stack, faceDownStack.top, faceUpCard.value);
 	}
 	[ClientRpc]
-	private void RpcClientSync(int order0Val, List<int> faceUp, List<int> faceDown, int faceDownTop, int faceUpCardVal)
+	private void RpcClientSync(int order0Val, List<int> faceDown, int faceDownTop, int faceUpCardVal)
 	{
 		handCards[0].SetValue(order0Val);
-		faceUpCard.stack = faceUp;
 		faceDownStack.stack = faceDown;
 		faceDownStack.top = faceDownTop;
+		faceUpCard.SetValue(faceUpCardVal);
 		faceUpCard.SetValue(faceUpCardVal);
 		faceDownStack.SetQuarter(Mathf.FloorToInt(faceDownTop / 48f * 4f) + 1);
 	}
@@ -143,7 +141,7 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	public void CmdDrawCard(int id)
 	{
-		if (handCards[0].value >= 0 && handCards[0].value <= 12 || faceDownStack.top < 0 || id != gameData.playerTurn)
+		if (handCards[0].value >= 0 && handCards[0].value <= 12 || faceDownStack.top < 0 || id != gameData.GetPlayerTurn())
 			return;
 
 		if (gameData.playerDrawn)
@@ -170,7 +168,7 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	public void CmdSwapHandCard(int id, int order1, int order2, int order1Val, int order2Val)
 	{
-		if ((order1 == 0 || order2 == 0) && id != gameData.playerTurn)
+		if ((order1 == 0 || order2 == 0) && id != gameData.GetPlayerTurn())
 		{
 			RpcTargetRejectSwapCard(connectionToClient, order1, order2, order1Val, order2Val);
 			return;
@@ -209,14 +207,14 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	public void CmdDiscardCard(int id, int order, int handCardVal)
 	{
-		if (id != gameData.playerTurn)
+		if (id != gameData.GetPlayerTurn())
 		{
 			RpcTargetRejectDiscard(connectionToClient, order, handCardVal);
 
 			return;
 		}
 
-		gameData.SetPlayerTurn((id + 1) % gameData.playerCount);
+		gameData.EnterPickCardPeriod((id + 1) % gameData.playerCount, 10f);
 		RpcDiscardCard(order, handCardVal, gameData.playerDrawn);
 		gameData.SetPlayerDrawn(false);
 	}
@@ -246,7 +244,7 @@ public class PlayerManager : NetworkBehaviour
 				handCards[order].SetValue(handCards[0].value);
 				handCards[0].SetValue(-1);
 			}
-			else
+			else if (!drawn)
 			{
 				CmdForceDraw(order);
 			}
@@ -277,5 +275,13 @@ public class PlayerManager : NetworkBehaviour
 
 		faceDownStack.SetQuarter(Mathf.FloorToInt(top / 48f * 4f) + 1);
 		faceDownStack.top = top;
+	}
+
+
+	[Command]
+	public void CmdPickCard(int id)
+	{
+		if (gameData.inPickCardPeriod)
+			gameData.pickCardPlayer.Add(id);
 	}
 }
