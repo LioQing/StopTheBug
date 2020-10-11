@@ -45,6 +45,6 @@ public class FaceDownStack : MonoBehaviour
 	{
 		NetworkIdentity networkidentity = NetworkClient.connection.identity;
 		playerManager = networkidentity.GetComponent<PlayerManager>();
-		playerManager.CmdDrawCard();
+		playerManager.CmdDrawCard(playerManager.playerId);
 	}
 }

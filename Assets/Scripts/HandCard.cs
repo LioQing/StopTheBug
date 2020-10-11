@@ -116,7 +116,10 @@ public class HandCard : NetworkBehaviour
 		if (closestCard == transform)
 			return;
 
-		playerManager.CmdSwapHandCard(order, closestCard.GetComponent<HandCard>().order, value, closestCard.GetComponent<HandCard>().value);
+		playerManager.CmdSwapHandCard(
+			playerManager.playerId, 
+			order, closestCard.GetComponent<HandCard>().order, 
+			value, closestCard.GetComponent<HandCard>().value);
 	}
 
 	private void OnTriggerEnter2D(Collider2D other)

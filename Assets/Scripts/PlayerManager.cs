@@ -12,6 +12,9 @@ public class PlayerManager : NetworkBehaviour
 	// 3. faceDownStack.stack
 	// 4. faceDownStack.top
 
+	// server only data:
+	// 1. gameData
+
 	public HandCard[] handCards = new HandCard[5];
 	public FaceDownStack faceDownStack;
 	public FaceUpCard faceUpCard;
@@ -56,7 +59,10 @@ public class PlayerManager : NetworkBehaviour
 		{
 			CmdAddPlayer();
 			CmdClientSync();
-			Debug.Log(playerId);
+			for (var i = 1; i <= 4; ++i)
+			{
+				handCards[i].SetValue(0);
+			}
 
 			clientSynced = true;
 		}
@@ -91,26 +97,36 @@ public class PlayerManager : NetworkBehaviour
 	}
 
 	[Command]
-	public void CmdDrawCard()
+	public void CmdDrawCard(int id)
 	{
-		if (handCards[0].value >= 0 && handCards[0].value <= 12 || faceDownStack.top < 0)
+		if (handCards[0].value >= 0 && handCards[0].value <= 12 || faceDownStack.top < 0 || id != gameData.playerTurn)
 			return;
 
+		if (gameData.playerDrawn)
+			return;
+
+		gameData.SetPlayerDrawn(true);
 		var tmp = faceDownStack.top--;
 		RpcDrawCard(faceDownStack.stack[tmp], faceDownStack.top);
 	}
 	[ClientRpc]
 	private void RpcDrawCard(int val, int top)
 	{
-		handCards[0].SetValue(val);
+		if (hasAuthority)
+			handCards[0].SetValue(val);
+		else
+			handCards[0].SetValue(0);
+
 		faceDownStack.SetQuarter(Mathf.FloorToInt(top / 48f * 4f) + 1);
 		faceDownStack.top = top;
-		Debug.Log(faceDownStack.top);
 	}
 
 	[Command]
-	public void CmdSwapHandCard(int order1, int order2, int order1Val, int order2Val)
+	public void CmdSwapHandCard(int id, int order1, int order2, int order1Val, int order2Val)
 	{
+		if ((order1 == 0 || order2 == 0) && id != gameData.playerTurn)
+			return;
+
 		if (order1 == 0)
 			RpcSwapHandCard(order1, order2, true, order2Val);
 		else if (order2 == 0)
@@ -130,7 +146,12 @@ public class PlayerManager : NetworkBehaviour
 		else
 		{
 			if (order0Changed)
-				handCards[0].SetValue(order0Val);
+			{
+				if (order0Val >= 0 && order0Val <= 12)
+					handCards[0].SetValue(0);
+				else
+					handCards[0].SetValue(order0Val);
+			}
 		}
 	}
 
@@ -141,6 +162,7 @@ public class PlayerManager : NetworkBehaviour
 			return;
 
 		gameData.SetPlayerTurn((id + 1) % gameData.playerCount);
+		gameData.SetPlayerDrawn(false);
 		RpcDiscardCard(order, handCardVal);
 	}
 	[ClientRpc]
