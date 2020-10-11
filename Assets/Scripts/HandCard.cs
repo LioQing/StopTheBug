@@ -82,7 +82,7 @@ public class HandCard : NetworkBehaviour
 
 		if (isOnStack)
 		{
-			playerManager.CmdPutCardOnStack(order, value);
+			playerManager.CmdDiscardCard(playerManager.playerId, order, value);
 			isOnStack = false;
 
 			return;

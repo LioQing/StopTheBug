@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using Mirror.Examples.Additive;
 
 public class PlayerManager : NetworkBehaviour
 {
 	// synced var:
 	// 1. handCards[0] - card drawn
-	// 2. faceUpStackData
+	// 2. faceUpCard.stack
 	// 3. faceDownStack.stack
 	// 4. faceDownStack.top
 
 	public HandCard[] handCards = new HandCard[5];
 	public FaceDownStack faceDownStack;
 	public FaceUpCard faceUpCard;
+	public GameData gameData;
+	public int playerId;
 	
 	private bool clientSynced = false;
 	private bool serverStarted = false;
@@ -29,6 +32,7 @@ public class PlayerManager : NetworkBehaviour
 		}
 		faceDownStack = GameObject.Find("Face Down Stack").GetComponent<FaceDownStack>();
 		faceUpCard = GameObject.Find("Face Up Stack").transform.GetChild(0).GetComponent<FaceUpCard>();
+		gameData = GameObject.Find("Game Data").GetComponent<GameData>();
 	}
 
 	private void Update()
@@ -42,7 +46,6 @@ public class PlayerManager : NetworkBehaviour
 					faceDownStack.stack.Add(i);
 			}
 			faceDownStack.top = faceDownStack.stack.Count - 1;
-			Debug.Log(faceDownStack.stack.Count);
 
 			faceUpCard.stack.Clear();
 
@@ -51,10 +54,24 @@ public class PlayerManager : NetworkBehaviour
 
 		if (!clientSynced && hasAuthority)
 		{
+			CmdAddPlayer();
 			CmdClientSync();
+			Debug.Log(playerId);
 
 			clientSynced = true;
 		}
+	}
+
+	[Command]
+	public void CmdAddPlayer()
+	{
+		RpcTargetPlayerId(connectionToClient, gameData.playerCount);
+		gameData.SetPlayerCount(gameData.playerCount + 1);
+	}
+	[TargetRpc]
+	private void RpcTargetPlayerId(NetworkConnection target, int id)
+	{
+		playerId = id;
 	}
 
 	[Command]
@@ -118,12 +135,16 @@ public class PlayerManager : NetworkBehaviour
 	}
 
 	[Command]
-	public void CmdPutCardOnStack(int order, int handCardVal)
+	public void CmdDiscardCard(int id, int order, int handCardVal)
 	{
-		RpcCardPutOnStack(order, handCardVal);
+		if (id != gameData.playerTurn)
+			return;
+
+		gameData.SetPlayerTurn((id + 1) % gameData.playerCount);
+		RpcDiscardCard(order, handCardVal);
 	}
 	[ClientRpc]
-	private void RpcCardPutOnStack(int order, int val)
+	private void RpcDiscardCard(int order, int val)
 	{
 		faceUpCard.SetValue(val);
 
