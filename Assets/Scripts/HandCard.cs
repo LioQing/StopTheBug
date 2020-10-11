@@ -83,6 +83,7 @@ public class HandCard : NetworkBehaviour
 		if (isOnStack)
 		{
 			playerManager.CmdDiscardCard(playerManager.playerId, order, value);
+			SetValue(-1);
 			isOnStack = false;
 
 			return;
@@ -116,10 +117,16 @@ public class HandCard : NetworkBehaviour
 		if (closestCard == transform)
 			return;
 
+		var closestCardScript = closestCard.GetComponent<HandCard>();
+
 		playerManager.CmdSwapHandCard(
 			playerManager.playerId, 
-			order, closestCard.GetComponent<HandCard>().order, 
-			value, closestCard.GetComponent<HandCard>().value);
+			order, closestCardScript.order, 
+			value, closestCardScript.value);
+
+		var tmp = closestCardScript.value;
+		closestCardScript.SetValue(value);
+		SetValue(tmp);
 	}
 
 	private void OnTriggerEnter2D(Collider2D other)

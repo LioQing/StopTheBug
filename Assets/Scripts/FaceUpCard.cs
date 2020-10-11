@@ -24,7 +24,7 @@ public class FaceUpCard : NetworkBehaviour
 	{
 		cardSprites = GameObject.Find("Card Sprites").GetComponent<CardSprites>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		SetValue(0);
+		SetValue(-1);
 	}
 
 	private void Update()

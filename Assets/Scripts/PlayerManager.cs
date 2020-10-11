@@ -16,11 +16,11 @@ public class PlayerManager : NetworkBehaviour
 	// 1. gameData
 
 	public HandCard[] handCards = new HandCard[5];
-	public FaceDownStack faceDownStack;
-	public FaceUpCard faceUpCard;
-	public GameData gameData;
+	public FaceDownStack faceDownStack = null;
+	public FaceUpCard faceUpCard = null;
+	public GameData gameData = null;
 	public int playerId;
-	
+
 	private bool clientSynced = false;
 	private bool serverStarted = false;
 
@@ -29,14 +29,44 @@ public class PlayerManager : NetworkBehaviour
 		base.OnStartClient();
 
 		var handCardsParent = GameObject.Find("Hand Cards").transform;
-		for (var i = 0; i < handCardsParent.childCount; ++i)
+		for (var i = 0; i < 5; ++i)
 		{
 			handCards[i] = handCardsParent.GetChild(i).GetComponent<HandCard>();
 		}
+
 		faceDownStack = GameObject.Find("Face Down Stack").GetComponent<FaceDownStack>();
 		faceUpCard = GameObject.Find("Face Up Stack").transform.GetChild(0).GetComponent<FaceUpCard>();
+	}
+
+	[Server]
+	public override void OnStartServer()
+	{
+		base.OnStartServer();
+
 		gameData = GameObject.Find("Game Data").GetComponent<GameData>();
 	}
+
+	public override void OnStopClient()
+	{
+		base.OnStopClient();
+
+		foreach (var card in handCards)
+		{
+			Destroy(card.gameObject);
+		}
+
+		Destroy(faceUpCard.gameObject);
+	}
+
+	[Server]
+	public override void OnStopServer()
+	{
+		base.OnStopServer();
+
+		Destroy(gameData.gameObject);
+	}
+
+
 
 	private void Update()
 	{
@@ -51,6 +81,9 @@ public class PlayerManager : NetworkBehaviour
 			faceDownStack.top = faceDownStack.stack.Count - 1;
 
 			faceUpCard.stack.Clear();
+
+			gameData.SetPlayerDrawn(false);
+			gameData.SetPlayerTurn(0);
 
 			serverStarted = true;
 		}
@@ -68,6 +101,9 @@ public class PlayerManager : NetworkBehaviour
 		}
 	}
 
+
+
+
 	[Command]
 	public void CmdAddPlayer()
 	{
@@ -79,6 +115,10 @@ public class PlayerManager : NetworkBehaviour
 	{
 		playerId = id;
 	}
+
+
+
+
 
 	[Command]
 	public void CmdClientSync()
@@ -95,6 +135,10 @@ public class PlayerManager : NetworkBehaviour
 		faceUpCard.SetValue(faceUpCardVal);
 		faceDownStack.SetQuarter(Mathf.FloorToInt(faceDownTop / 48f * 4f) + 1);
 	}
+
+
+
+
 
 	[Command]
 	public void CmdDrawCard(int id)
@@ -121,11 +165,16 @@ public class PlayerManager : NetworkBehaviour
 		faceDownStack.top = top;
 	}
 
+
+
 	[Command]
 	public void CmdSwapHandCard(int id, int order1, int order2, int order1Val, int order2Val)
 	{
 		if ((order1 == 0 || order2 == 0) && id != gameData.playerTurn)
+		{
+			RpcTargetRejectSwapCard(connectionToClient, order1, order2, order1Val, order2Val);
 			return;
+		}
 
 		if (order1 == 0)
 			RpcSwapHandCard(order1, order2, true, order2Val);
@@ -137,13 +186,7 @@ public class PlayerManager : NetworkBehaviour
 	[ClientRpc]
 	private void RpcSwapHandCard(int order1, int order2, bool order0Changed, int order0Val)
 	{
-		if (hasAuthority)
-		{
-			var tmp = handCards[order1].value;
-			handCards[order1].SetValue(handCards[order2].value);
-			handCards[order2].SetValue(tmp);
-		}
-		else
+		if (!hasAuthority)
 		{
 			if (order0Changed)
 			{
@@ -154,30 +197,85 @@ public class PlayerManager : NetworkBehaviour
 			}
 		}
 	}
+	[TargetRpc]
+	private void RpcTargetRejectSwapCard(NetworkConnection target, int order1, int order2, int order1Val, int order2Val)
+	{
+		handCards[order1].SetValue(order1Val);
+		handCards[order2].SetValue(order2Val);
+	}
+
+
 
 	[Command]
 	public void CmdDiscardCard(int id, int order, int handCardVal)
 	{
 		if (id != gameData.playerTurn)
+		{
+			RpcTargetRejectDiscard(connectionToClient, order, handCardVal);
+
 			return;
+		}
 
 		gameData.SetPlayerTurn((id + 1) % gameData.playerCount);
+		RpcDiscardCard(order, handCardVal, gameData.playerDrawn);
 		gameData.SetPlayerDrawn(false);
-		RpcDiscardCard(order, handCardVal);
 	}
 	[ClientRpc]
-	private void RpcDiscardCard(int order, int val)
+	private void RpcDiscardCard(int order, int val, bool drawn)
 	{
 		faceUpCard.SetValue(val);
 
 		if (hasAuthority)
 		{
 			handCards[order].SetValue(-1);
+
+			if (!drawn && handCards[0].value >= 0 && handCards[0].value <= 12)
+			{
+				CmdForceDraw(order);
+				for (var i = 1; i <= 4; ++i)
+				{
+					if (i == order || handCards[i].value >= 0 && handCards[i].value <= 12)
+						continue;
+
+					handCards[i].SetValue(handCards[0].value);
+					handCards[0].SetValue(-1);
+				}
+			}
+			else if (handCards[0].value >= 0 && handCards[0].value <= 12)
+			{
+				handCards[order].SetValue(handCards[0].value);
+				handCards[0].SetValue(-1);
+			}
+			else
+			{
+				CmdForceDraw(order);
+			}
 		}
 		else
 		{
-			if (order == 0)
-				handCards[0].SetValue(-1);
+			handCards[0].SetValue(-1);
 		}
+	}
+	[TargetRpc]
+	private void RpcTargetRejectDiscard(NetworkConnection target, int order, int val)
+	{
+		handCards[order].SetValue(val);
+	}
+	[Command]
+	private void CmdForceDraw(int order)
+	{
+		var tmp = faceDownStack.top--;
+		RpcForceDraw(order, faceDownStack.stack[tmp], faceDownStack.top);
+	}
+	[ClientRpc]
+	private void RpcForceDraw(int order, int val, int top)
+	{
+		if (hasAuthority)
+			handCards[order].SetValue(val);
+		else
+			handCards[0].SetValue(-1);
+
+		faceDownStack.SetQuarter(Mathf.FloorToInt(top / 48f * 4f) + 1);
+		faceDownStack.top = top;
 	}
 }

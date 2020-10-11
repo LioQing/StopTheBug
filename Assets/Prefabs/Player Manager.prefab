@@ -79,3 +79,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b876b7e193169a84493c30601662ef01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  handCards:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  faceDownStack: {fileID: 0}
+  faceUpCard: {fileID: 0}
+  gameData: {fileID: 0}
+  playerId: 0
+  handCardObject: {fileID: 515727702456472621, guid: d1320e139f8cf1246b3f2f44fca6c70b,
+    type: 3}
+  gameDataObject: {fileID: 8551301059366592837, guid: 736d777dc868e514da0c7442327f6d09,
+    type: 3}
+  faceUpCardObject: {fileID: 9141843138334954775, guid: 53cbf9b1e0ef3034298df738985ba2bd,
+    type: 3}
