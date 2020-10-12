@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Mirror.Examples.Additive;
+using JetBrains.Annotations;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -20,6 +21,7 @@ public class PlayerManager : NetworkBehaviour
 	public FaceUpCard faceUpCard = null;
 	public GameData gameData = null;
 	public int playerId;
+	public PeriodIndicator periodIndicator = null;
 
 	[SerializeField] private bool clientSynced = false;
 	[SerializeField] private bool serverStarted = false;
@@ -38,6 +40,7 @@ public class PlayerManager : NetworkBehaviour
 
 		faceDownStack = GameObject.Find("Face Down Stack").GetComponent<FaceDownStack>();
 		faceUpCard = GameObject.Find("Face Up Stack").transform.GetChild(0).GetComponent<FaceUpCard>();
+		periodIndicator = GameObject.Find("Period Indicator").GetComponent<PeriodIndicator>();
 	}
 
 	[Server]
@@ -52,6 +55,8 @@ public class PlayerManager : NetworkBehaviour
 	{
 		gameData.SetPlayerTurn(0);
 		gameData.SetPlayerCount(0);
+		gameData.ResetTimer();
+		gameData.EnterPickCardPeriod(0, 0);
 		gameData.SetPlayerDrawn(false);
 	}
 
@@ -282,6 +287,57 @@ public class PlayerManager : NetworkBehaviour
 	public void CmdPickCard(int id)
 	{
 		if (gameData.inPickCardPeriod)
-			gameData.pickCardPlayer.Add(id);
+		{
+			if (!gameData.pickCardPlayer.Contains(id))
+				gameData.pickCardPlayer.Add(id);
+			else
+				gameData.pickCardPlayer.Remove(id);
+		}
+	}
+
+
+
+	[Command]
+	public void CmdSetPickCardIndicator(string str, List<int> pickPlayers)
+	{
+		if (pickPlayers.Count > 0)
+		{
+			str += "\n Player";
+			bool someFlag = false;
+			foreach (int player in pickPlayers)
+			{
+				if (!someFlag)
+				{ 
+					someFlag = true;
+					str += " ";
+				}
+				else
+					str += ", ";
+				str += $"{player}";
+			}
+		}
+		else
+		{
+			str += "\nNo player";
+		}
+
+		str += "\n have chosen to pick.";
+
+		RpcSetPickCardIndicator(str);
+	}
+	[ClientRpc]
+	private void RpcSetPickCardIndicator(string str)
+	{
+		periodIndicator.SetText(str);
+	}
+	[Command]
+	public void CmdSetDrawDiscardCardIndicator(int turn)
+	{
+		RpcSetDrawDiscardCardIndicator(turn);
+	}
+	[ClientRpc]
+	private void RpcSetDrawDiscardCardIndicator(int turn)
+	{
+		periodIndicator.SetText($"Draw & Discard Card:\nPlayer {turn}'s Turn");
 	}
 }

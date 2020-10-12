@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameData : NetworkBehaviour
@@ -12,6 +13,8 @@ public class GameData : NetworkBehaviour
 
 	public bool inPickCardPeriod = false;
 	[SerializeField] private float timer = 0f;
+
+	private PlayerManager playerManager;
 
 	public void EnterPickCardPeriod(int nextPlayer, float startTimer)
 	{
@@ -29,6 +32,11 @@ public class GameData : NetworkBehaviour
 
 		inPickCardPeriod = false;
 		pickCardPlayer.Clear();
+	}
+
+	public void ResetTimer()
+	{
+		timer = 0f;
 	}
 
 	public void SetPlayerTurn(int player)
@@ -55,9 +63,38 @@ public class GameData : NetworkBehaviour
 
 	private void Update()
 	{
+		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+		playerManager = networkidentity.GetComponent<PlayerManager>();
+		if (playerManager.playerId != 0)
+			return;
+
 		if (timer > 0f)
+		{
 			timer -= Time.deltaTime;
+			SetPickCardIndicator($"Pick Card:\n{(int)timer} Seconds Left");
+		}
 		else if (inPickCardPeriod)
+		{
 			ExitPickCardPeriod();
+			SetDrawDiscardCardIndicator();
+		}
+		else
+		{
+			SetDrawDiscardCardIndicator();
+		}
+	}
+
+	private void SetPickCardIndicator(string str)
+	{
+		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+		playerManager = networkidentity.GetComponent<PlayerManager>();
+		playerManager.CmdSetPickCardIndicator(str, pickCardPlayer.ToList());
+	}
+	
+	private void SetDrawDiscardCardIndicator()
+	{
+		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+		playerManager = networkidentity.GetComponent<PlayerManager>();
+		playerManager.CmdSetDrawDiscardCardIndicator(playerTurn);
 	}
 }

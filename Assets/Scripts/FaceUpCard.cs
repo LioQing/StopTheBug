@@ -10,6 +10,7 @@ public class FaceUpCard : NetworkBehaviour
 
 	private PlayerManager playerManager;
 	private SpriteRenderer spriteRenderer;
+	private BoxCollider2D collider;
 	private CardSprites cardSprites;
 
 	public void SetValue(int val)
@@ -27,12 +28,17 @@ public class FaceUpCard : NetworkBehaviour
 	{
 		cardSprites = GameObject.Find("Card Sprites").GetComponent<CardSprites>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
+		collider = GetComponent<BoxCollider2D>();
 		SetValue(-1);
 	}
 
 	private void Update()
 	{
 		transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
+
+		collider.size = new Vector2(
+			spriteRenderer.bounds.size.x / transform.parent.transform.localScale.x / transform.localScale.x,
+			spriteRenderer.bounds.size.y / transform.parent.transform.localScale.y / transform.localScale.y);
 	}
 
 	private void OnMouseDown()
