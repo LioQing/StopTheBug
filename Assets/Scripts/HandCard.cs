@@ -28,7 +28,7 @@ public class HandCard : NetworkBehaviour
 	private void Start()
 	{
 		cardSprites = GameObject.Find("Card Sprites").GetComponent<CardSprites>();
-		faceUpCollider = GameObject.Find("Face Up Stack").GetComponent<Collider2D>();
+		faceUpCollider = GameObject.Find("Face Up Card").GetComponent<Collider2D>();
 		order = transform.GetSiblingIndex();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		SetValue(-1);

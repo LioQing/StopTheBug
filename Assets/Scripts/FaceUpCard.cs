@@ -36,9 +36,7 @@ public class FaceUpCard : NetworkBehaviour
 	{
 		transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
 
-		collider.size = new Vector2(
-			spriteRenderer.bounds.size.x / transform.parent.transform.localScale.x / transform.localScale.x,
-			spriteRenderer.bounds.size.y / transform.parent.transform.localScale.y / transform.localScale.y);
+		collider.size = new Vector2(0.24f, 0.32f);
 	}
 
 	private void OnMouseDown()
