@@ -675,7 +675,6 @@ GameObject:
   - component: {fileID: 863869870}
   - component: {fileID: 863869869}
   - component: {fileID: 863869868}
-  - component: {fileID: 863869867}
   m_Layer: 0
   m_Name: Hand Card (4)
   m_TagString: Untagged
@@ -697,24 +696,6 @@ Transform:
   m_Father: {fileID: 1785275261}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &863869867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 863869865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
-  localScaleSensitivity: 0.01
 --- !u!114 &863869868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -836,7 +817,6 @@ GameObject:
   - component: {fileID: 868113480}
   - component: {fileID: 868113479}
   - component: {fileID: 868113478}
-  - component: {fileID: 868113477}
   m_Layer: 0
   m_Name: Hand Card (2)
   m_TagString: Untagged
@@ -858,24 +838,6 @@ Transform:
   m_Father: {fileID: 1785275261}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &868113477
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 868113475}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
-  localScaleSensitivity: 0.01
 --- !u!114 &868113478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,7 +1010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 795025148
-  serverOnly: 0
+  serverOnly: 1
   m_AssetId: 
   hasSpawned: 0
 --- !u!114 &1273665062
@@ -1159,7 +1121,7 @@ Canvas:
   m_GameObject: {fileID: 1419823553}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -1168,7 +1130,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: 611524507
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!224 &1419823557
@@ -1205,7 +1167,6 @@ GameObject:
   - component: {fileID: 1508647904}
   - component: {fileID: 1508647903}
   - component: {fileID: 1508647902}
-  - component: {fileID: 1508647901}
   m_Layer: 0
   m_Name: Hand Card (3)
   m_TagString: Untagged
@@ -1227,24 +1188,6 @@ Transform:
   m_Father: {fileID: 1785275261}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1508647901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1508647899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
-  localScaleSensitivity: 0.01
 --- !u!114 &1508647902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1553,7 +1496,6 @@ GameObject:
   - component: {fileID: 1850120408}
   - component: {fileID: 1850120407}
   - component: {fileID: 1850120406}
-  - component: {fileID: 1850120405}
   m_Layer: 0
   m_Name: Hand Card (1)
   m_TagString: Untagged
@@ -1575,24 +1517,6 @@ Transform:
   m_Father: {fileID: 1785275261}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1850120405
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1850120403}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
-  localScaleSensitivity: 0.01
 --- !u!114 &1850120406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1771,6 +1695,8 @@ MonoBehaviour:
   playerTurn: 0
   playerCount: 0
   playerDrawn: 0
+  discarder: -1
+  inPickCardStreak: 0
   inPickCardPeriod: 0
   timer: 0
 --- !u!4 &1554708775115711285
@@ -2089,7 +2015,6 @@ GameObject:
   - component: {fileID: 8672403833682805232}
   - component: {fileID: 8672403833682805233}
   - component: {fileID: 8672403833682805246}
-  - component: {fileID: 8672403833682805247}
   m_Layer: 0
   m_Name: Hand Card
   m_TagString: Untagged
@@ -2113,21 +2038,3 @@ MonoBehaviour:
   serverOnly: 0
   m_AssetId: 
   hasSpawned: 0
---- !u!114 &8672403833682805247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8672403833682805245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 0
-  localPositionSensitivity: 0.01
-  localRotationSensitivity: 0.01
-  localScaleSensitivity: 0.01

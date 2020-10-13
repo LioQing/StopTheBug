@@ -56,8 +56,12 @@ public class PlayerManager : NetworkBehaviour
 		gameData.SetPlayerTurn(0);
 		gameData.SetPlayerCount(0);
 		gameData.ResetTimer();
-		gameData.EnterPickCardPeriod(0, 0);
+		gameData.inPickCardPeriod = false;
+		gameData.inPickCardStreak = false;
 		gameData.SetPlayerDrawn(false);
+		gameData.timer = 0f;
+		gameData.pickCardPlayer.Clear();
+		gameData.discarder = -1;
 	}
 
 	private void Update()
@@ -215,14 +219,13 @@ public class PlayerManager : NetworkBehaviour
 		if (id != gameData.GetPlayerTurn())
 		{
 			RpcTargetRejectDiscard(connectionToClient, order, handCardVal);
-
 			return;
 		}
 
 		if (!gameData.inPickCardStreak)
-			gameData.EnterPickCardPeriod((id + 1) % gameData.playerCount, 10f);
+			gameData.EnterPickCardPeriod((id + 1) % gameData.playerCount, 10f, id);
 		else
-			gameData.EnterPickCardPeriodInStreak(10f);
+			gameData.EnterPickCardPeriodInStreak(10f, id);
 
 		RpcDiscardCard(order, handCardVal, gameData.playerDrawn, gameData.inPickCardStreak);
 		gameData.SetPlayerDrawn(false);
@@ -301,7 +304,7 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	public void CmdPickCard(int id)
 	{
-		if (gameData.inPickCardPeriod)
+		if (gameData.inPickCardPeriod && id != gameData.discarder)
 		{
 			if (!gameData.pickCardPlayer.Contains(id))
 				gameData.pickCardPlayer.Add(id);
@@ -310,15 +313,20 @@ public class PlayerManager : NetworkBehaviour
 		}
 	}
 	[Command]
-	public void CmdPlayerPickCard()
+	public void CmdPlayerPickCard(int id)
 	{
-		RpcPlayerPickCard(faceUpCard.value, faceUpCard.lastValue);
+		RpcPlayerPickCard(id, faceUpCard.value, faceUpCard.lastValue);
 	}
 	[ClientRpc]
-	private void RpcPlayerPickCard(int val, int lastVal)
+	private void RpcPlayerPickCard(int id, int val, int lastVal)
 	{
 		faceUpCard.SetValue(lastVal);
-		if (hasAuthority)
+
+		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+		PlayerManager playerManager = networkidentity.GetComponent<PlayerManager>();
+		var targetPlayerId = playerManager.playerId;
+
+		if (targetPlayerId == id)
 			handCards[0].SetValue(val);
 		else
 			handCards[0].SetValue(0);

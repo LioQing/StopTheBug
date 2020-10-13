@@ -11,22 +11,25 @@ public class GameData : NetworkBehaviour
 	public bool playerDrawn = false;
 	public IList<int> pickCardPlayer = new List<int>();
 
+	public int discarder = -1;
 	public bool inPickCardStreak = false;
-	private int tmpPlayerTurn;
 	public bool inPickCardPeriod = false;
-	[SerializeField] private float timer = 0f;
+	public float timer = 0f;
+	private int tmpPlayerTurn;
 
 	private PlayerManager playerManager;
 
-	public void EnterPickCardPeriod(int nextPlayer, float startTimer)
+	public void EnterPickCardPeriod(int nextPlayer, float startTimer, int discarder)
 	{
+		this.discarder = discarder;
 		tmpPlayerTurn = nextPlayer;
 		inPickCardPeriod = true;
 		timer = startTimer;
 	}
 
-	public void EnterPickCardPeriodInStreak(float startTimer)
+	public void EnterPickCardPeriodInStreak(float startTimer, int discarder)
 	{
+		this.discarder = discarder;
 		inPickCardPeriod = true;
 		timer = startTimer;
 	}
@@ -39,7 +42,7 @@ public class GameData : NetworkBehaviour
 		if (pickCardPlayer.Count == 1)
 		{
 			inPickCardStreak = true;
-			playerManager.CmdPlayerPickCard();
+			playerManager.CmdPlayerPickCard(pickCardPlayer[0]);
 			playerTurn = pickCardPlayer[0];
 		}
 		else
