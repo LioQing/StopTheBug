@@ -44,7 +44,7 @@ public class HandCard : NetworkBehaviour
 		if (!isDragging && order != 0)
 			transform.localPosition = new Vector3(-width / 2f + order * width / 5f, -height / 2f + spriteRenderer.bounds.size.y / 2f, 0f);
 		else if (!isDragging && order == 0)
-			transform.localPosition = new Vector3(width / 4f, smaller_size / 4f, 0f);
+			transform.localPosition = new Vector3(0f, smaller_size / 4f, 0f);
 
 		GetComponent<BoxCollider2D>().size = new Vector2(
 			spriteRenderer.bounds.size.x / transform.localScale.x,

@@ -149,7 +149,7 @@ public class PlayerManager : NetworkBehaviour
 		if (handCards[0].value >= 0 && handCards[0].value <= 12 || faceDownStack.top < 0 || id != gameData.GetPlayerTurn())
 			return;
 
-		if (gameData.playerDrawn)
+		if (gameData.playerDrawn || gameData.inPickCardStreak)
 			return;
 
 		gameData.SetPlayerDrawn(true);
@@ -219,12 +219,16 @@ public class PlayerManager : NetworkBehaviour
 			return;
 		}
 
-		gameData.EnterPickCardPeriod((id + 1) % gameData.playerCount, 10f);
-		RpcDiscardCard(order, handCardVal, gameData.playerDrawn);
+		if (!gameData.inPickCardStreak)
+			gameData.EnterPickCardPeriod((id + 1) % gameData.playerCount, 10f);
+		else
+			gameData.EnterPickCardPeriodInStreak(10f);
+
+		RpcDiscardCard(order, handCardVal, gameData.playerDrawn, gameData.inPickCardStreak);
 		gameData.SetPlayerDrawn(false);
 	}
 	[ClientRpc]
-	private void RpcDiscardCard(int order, int val, bool drawn)
+	private void RpcDiscardCard(int order, int val, bool drawn, bool inPickStreak)
 	{
 		faceUpCard.SetValue(val);
 
@@ -232,7 +236,15 @@ public class PlayerManager : NetworkBehaviour
 		{
 			handCards[order].SetValue(-1);
 
-			if (!drawn && handCards[0].value >= 0 && handCards[0].value <= 12)
+			if (inPickStreak)
+			{
+				if (order != 0)
+				{
+					handCards[order].SetValue(handCards[0].value);
+					handCards[0].SetValue(-1);
+				}
+			}
+			else if (!drawn && handCards[0].value >= 0 && handCards[0].value <= 12)
 			{
 				CmdForceDraw(order);
 				for (var i = 1; i <= 4; ++i)
@@ -267,6 +279,9 @@ public class PlayerManager : NetworkBehaviour
 	[Command]
 	private void CmdForceDraw(int order)
 	{
+		if (gameData.inPickCardStreak)
+			return;
+
 		var tmp = faceDownStack.top--;
 		RpcForceDraw(order, faceDownStack.stack[tmp], faceDownStack.top);
 	}
@@ -293,6 +308,20 @@ public class PlayerManager : NetworkBehaviour
 			else
 				gameData.pickCardPlayer.Remove(id);
 		}
+	}
+	[Command]
+	public void CmdPlayerPickCard()
+	{
+		RpcPlayerPickCard(faceUpCard.value, faceUpCard.lastValue);
+	}
+	[ClientRpc]
+	private void RpcPlayerPickCard(int val, int lastVal)
+	{
+		faceUpCard.SetValue(lastVal);
+		if (hasAuthority)
+			handCards[0].SetValue(val);
+		else
+			handCards[0].SetValue(0);
 	}
 
 
