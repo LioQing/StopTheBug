@@ -85,6 +85,10 @@ public class GameData : NetworkBehaviour
 	private void Update()
 	{
 		NetworkIdentity networkidentity = NetworkClient.connection.identity;
+
+		if (!networkidentity)
+			return;
+
 		playerManager = networkidentity.GetComponent<PlayerManager>();
 		if (playerManager.playerId != 0)
 			return;

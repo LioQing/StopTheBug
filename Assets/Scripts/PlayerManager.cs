@@ -22,6 +22,7 @@ public class PlayerManager : NetworkBehaviour
 	public GameData gameData = null;
 	public int playerId;
 	public PeriodIndicator periodIndicator = null;
+	public NetworkManagerScale hud = null;
 
 	[SerializeField] private bool clientSynced = false;
 	[SerializeField] private bool serverStarted = false;
@@ -41,6 +42,7 @@ public class PlayerManager : NetworkBehaviour
 		faceDownStack = GameObject.Find("Face Down Stack").GetComponent<FaceDownStack>();
 		faceUpCard = GameObject.Find("Face Up Stack").transform.GetChild(0).GetComponent<FaceUpCard>();
 		periodIndicator = GameObject.Find("Period Indicator").GetComponent<PeriodIndicator>();
+		hud = GameObject.Find("Network Manager").GetComponent<NetworkManagerScale>();
 	}
 
 	[Server]
@@ -76,6 +78,8 @@ public class PlayerManager : NetworkBehaviour
 			}
 			faceDownStack.top = faceDownStack.stack.Count - 1;
 
+			ShuffleStack(ref faceDownStack.stack);
+
 			faceUpCard.SetValue(-1);
 			faceUpCard.SetValue(-1);
 
@@ -99,6 +103,17 @@ public class PlayerManager : NetworkBehaviour
 			}
 
 			clientSynced = true;
+		}
+	}
+
+	private void ShuffleStack(ref IList<int> list)
+	{
+		for (var i = list.Count - 1; i > 0; --i)
+		{
+			int j = Random.Range(0, i);
+			var tmp = list[i];
+			list[i] = list[j];
+			list[j] = tmp;
 		}
 	}
 
